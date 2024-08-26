@@ -1,0 +1,54 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block content %}
+    <div style="width: 80%; margin: 20px auto;">
+        <canvas id="qcChart"></canvas>
+    </div>
+    {{ block.super }}
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('qc_chart_data/')
+                .then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('qcChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.map(item => new Date(item.date).toLocaleDateString()),
+                            datasets: [{
+                                label: 'Number of Quality Checks',
+                                data: data.map(item => item.count),
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Number of Checks'
+                                    }
+                                },
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Date'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                });
+        });
+    </script>
+{% endblock %}
